@@ -6,10 +6,10 @@ namespace MP.Auth.Models;
 // 除 official / guest 已实现外，其余渠道先占位保留（NotImplementedAuthValidator），
 // 后续接入哪个渠道就补一个 Validator 实现即可，不影响其他代码。
 public sealed record LoginRequest(
-    string Provider,
-    string? AppId,
-    string? DeviceId,
-    Dictionary<string, string>? AuthPayload);
+    [property: JsonPropertyName("provider")] string Provider,
+    [property: JsonPropertyName("app_id")] string? AppId,
+    [property: JsonPropertyName("device_id")] string? DeviceId,
+    [property: JsonPropertyName("auth_payload")] Dictionary<string, string>? AuthPayload);
 
 public sealed record LoginResponse(
     [property: JsonPropertyName("access_token")] string AccessToken,

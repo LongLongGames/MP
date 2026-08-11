@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <!-- 极简依赖，全部对 Native AOT 友好，无 EF Core -->
-    <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="dbup-postgresql" Version="7.0.1" />
     <PackageReference Include="StackExchange.Redis" Version="3.1.3" />
