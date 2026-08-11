@@ -12,7 +12,7 @@ WORKDIR "/src/src/MP.Auth"
 RUN dotnet publish "MP.Auth.csproj" -c Release -r linux-x64 -o /app/publish /p:PublishAot=true
 
 # ---- 运行阶段：无 .NET 运行时依赖的极简底包 ----
-FROM mcr.microsoft.com/dotnet/nightly/chiseled/runtimes-dep:10.0
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble-chiseled
 WORKDIR /app
 COPY --from=build /app/publish .
 EXPOSE 8080
