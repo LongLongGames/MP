@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization.Metadata;
 using MP.Auth.Endpoints;
 using MP.Auth.Infrastructure.Db;
 using MP.Auth.Infrastructure.Jwt;
