@@ -34,12 +34,27 @@ public sealed record MeResponse(
 
 public sealed record ErrorResponse(string Error);
 
+// ---------- Catalog ----------
+public sealed record GameItem(
+    [property: JsonPropertyName("game_id")] string GameId,
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("status")] string Status,
+    [property: JsonPropertyName("sort_order")] int SortOrder,
+    [property: JsonPropertyName("icon_url")] string? IconUrl,
+    [property: JsonPropertyName("min_client_ver")] string? MinClientVer,
+    [property: JsonPropertyName("extra_json")] string? ExtraJson);
+
+public sealed record GameListResponse(
+    [property: JsonPropertyName("games")] GameItem[] Games);
+
 [JsonSerializable(typeof(LoginRequest))]
 [JsonSerializable(typeof(LoginResponse))]
 [JsonSerializable(typeof(RefreshRequest))]
 [JsonSerializable(typeof(RefreshResponse))]
 [JsonSerializable(typeof(MeResponse))]
 [JsonSerializable(typeof(ErrorResponse))]
+[JsonSerializable(typeof(GameItem))]
+[JsonSerializable(typeof(GameListResponse))]
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
 public partial class AppJsonContext : JsonSerializerContext
 {

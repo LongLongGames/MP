@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16
+    ports:
+      - "5432:5432"  # 👈 让 Navicat 可访问
+    environment:
+      POSTGRES_DB: mp
+      POSTGRES_USER: mp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mp_dev_pwd}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  mp-auth:
+    # 编译环境改用 Dockerfile
+    #build:
+    #  context: .
+    #  dockerfile: src/MP.Auth/Dockerfile
+    # 生产环境改用 GHCR 镜像：
+    image: ghcr.io/setsuodu/mp/mp-auth:v0.1.0
+    environment:
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=mp;Username=mp;Password=${POSTGRES_PASSWORD:-mp_dev_pwd}"
+      ConnectionStrings__Redis: "redis:6379"
+      Jwt__Secret: ${JWT_SECRET:-CHANGE_ME_TO_A_LONG_RANDOM_SECRET_IN_PRODUCTION}
+      Jwt__Issuer: battle-net-mp
+      Jwt__AccessTokenMinutes: 120
+      Jwt__RefreshTokenDays: 14
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mp-gateway:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - mp-auth
+    restart: unless-stopped
+
+volumes:
+  pgdata:
