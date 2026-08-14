@@ -31,7 +31,7 @@ services:
     #  context: .
     #  dockerfile: src/MP.Auth/Dockerfile
     # 生产环境改用 GHCR 镜像：
-    image: ghcr.io/setsuodu/mp/mp-auth:v0.2.0
+    image: ghcr.io/longlonggames/mp/mp-auth:v0.2.0
     environment:
       ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=mp;Username=mp;Password=${POSTGRES_PASSWORD:-mp_dev_pwd}"
       ConnectionStrings__Redis: "redis:6379"
