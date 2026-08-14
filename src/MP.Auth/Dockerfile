@@ -1,8 +1,6 @@
 # ---- 编译阶段 ----
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM ghcr.io/longlonggames/dotnet-aot-base:10.0 AS build
 WORKDIR /src
-
-RUN apt-get update && apt-get install -y clang zlib1g-dev && rm -rf /var/lib/apt/lists/*
 
 COPY ["src/MP.Auth/MP.Auth.csproj", "src/MP.Auth/"]
 RUN dotnet restore "src/MP.Auth/MP.Auth.csproj"
