@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16
     ports:
-      - "5432:5432"  # 👈 让 Navicat 可访问
+      - "11032:5432"  # 👈 让 Navicat 可访问（正式版去掉）
     environment:
       POSTGRES_DB: mp
       POSTGRES_USER: mp
@@ -50,7 +50,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "8080:80"
+      - "11080:80"
     depends_on:
       - mp-auth
     restart: unless-stopped
