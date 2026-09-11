@@ -13,6 +13,7 @@ LongLongGames 平台核心：统一账号 + 游戏 Catalog。全公司只部署�
 |------|------|
 | mp-gateway | Nginx（8080） |
 | mp-auth | Auth + Catalog（.NET 10 AOT） |
+| mp-auth-migrate | 一次性 DbUp 迁移 Job（同一镜像，`--migrate`） |
 
 渠道：`official`、`guest` 已可用；Steam 等占位。
 
@@ -24,8 +25,22 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-- 网关：http://localhost:8080
+启动顺序：postgres healthy → **mp-auth-migrate 成功退出** → mp-auth → gateway。
+
+- 网关：http://localhost:11080（以 compose 端口为准）
 - 健康检查：`GET /health`
+
+### 数据库迁移
+
+迁移已从 API 启动路径拆出，避免多副本竞态。
+
+| 场景 | 命令 |
+|------|------|
+| 只跑迁移 | `docker compose run --rm mp-auth-migrate` |
+| 本地调试（无 Docker） | `dotnet run --project src/MP.Auth -- --migrate` |
+| 正常启动 | `docker compose up -d`（自动先 migrate） |
+
+规范详见 [GameTemplate](https://github.com/LongLongGames/GameTemplate) 与公司 profile README。
 
 ## API
 
@@ -40,7 +55,7 @@ docker compose up -d --build
 | GET | /auth/me | 当前用户 |
 
 ```bash
-curl -s -X POST http://localhost:8080/api/v1/auth/login \
+curl -s -X POST http://localhost:11080/api/v1/auth/login \
   -H 'Content-Type: application/json' \
   -d '{
     "provider": "official",

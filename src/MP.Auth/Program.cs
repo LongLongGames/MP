@@ -9,6 +9,30 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
+// =================== 【迁移入口：--migrate 或 RUN_MIGRATION_ONLY=true】 ===================
+var runMigrationOnly = args.Contains("--migrate")
+    || string.Equals(Environment.GetEnvironmentVariable("RUN_MIGRATION_ONLY"), "true", StringComparison.OrdinalIgnoreCase);
+
+if (runMigrationOnly)
+{
+    var connStr = builder.Configuration.GetConnectionString("Postgres")
+        ?? throw new InvalidOperationException("缺少 ConnectionStrings__Postgres");
+
+    Console.WriteLine("Executing database migrations (MP.Auth)...");
+    try
+    {
+        DbMigrator.Run(connStr);
+        Console.WriteLine("Migration completed successfully.");
+        return; // 只跑迁移，不启动 Web
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"DB migration failed: {ex.Message}");
+        Environment.Exit(1);
+    }
+}
+// ========================================================================================
+
 // ---- JSON：Native AOT 走 Source Generator，零反射 ----
 builder.Services.ConfigureHttpJsonOptions(opts =>
 {
@@ -35,8 +59,7 @@ builder.Services.AddSingleton(new SimpleJwt(jwtSecret, jwtIssuer));
 
 var app = builder.Build();
 
-// ---- 启动时自动跑数据库迁移（DbUp，幂等） ----
-DbMigrator.Run(pgConnStr);
+// 注意：正常启动路径不再执行迁移。迁移由 compose 的 mp-auth-migrate Job 或手动 --migrate 完成。
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "mp-auth" }));
 app.MapAuthEndpoints();

@@ -6,12 +6,13 @@ namespace MP.Auth.Infrastructure.Db;
 
 public static class DbMigrator
 {
-    /// <summary>启动时执行 Scripts/ 下按文件名顺序排列的嵌入 SQL 脚本，幂等。</summary>
+    /// <summary>执行 Scripts/ 下按文件名顺序排列的嵌入 SQL 脚本，幂等。仅由 --migrate 入口或迁移 Job 调用。</summary>
     public static void Run(string connectionString)
     {
         var upgrader = DeployChanges.To
             .PostgresqlDatabase(connectionString)
             .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+            .WithTransaction()
             .LogToConsole()
             .Build();
 

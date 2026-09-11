@@ -25,6 +25,19 @@ services:
       retries: 10
     restart: unless-stopped
 
+  # 一次性迁移 Job（单镜像，--migrate 后退出）
+  mp-auth-migrate:
+    build:
+      context: .
+      dockerfile: src/MP.Auth/Dockerfile
+    command: ["--migrate"]
+    environment:
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=mp;Username=mp;Password=${POSTGRES_PASSWORD:-mp_dev_pwd}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   mp-auth:
     build:
       context: .
@@ -43,6 +56,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mp-auth-migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   mp-gateway:
