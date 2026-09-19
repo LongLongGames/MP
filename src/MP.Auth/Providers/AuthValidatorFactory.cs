@@ -1,14 +1,18 @@
 using MP.Auth.Infrastructure.Db;
+using Microsoft.Extensions.Configuration;
 
 namespace MP.Auth.Providers;
 
-public sealed class AuthValidatorFactory(AccountRepository repo)
+public sealed class AuthValidatorFactory(
+    AccountRepository repo,
+    IConfiguration config,
+    IHttpClientFactory httpClientFactory)
 {
-    // 已实现：official、guest。其余先占位保留，等真正要接某个渠道再实现替换。
+    // 其余渠道先占位，真正要接时再实现替换。
     private static readonly HashSet<string> Reserved =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            "steam", "psn", "xbox", "nintendo", "apple", "google", "microsoft_store", "official_oauth",
+            "psn", "xbox", "nintendo", "apple", "google", "microsoft_store", "official_oauth",
         };
 
     public IAuthValidator Get(string provider)
@@ -17,6 +21,7 @@ public sealed class AuthValidatorFactory(AccountRepository repo)
         {
             "guest" => new GuestAuthValidator(),
             "official" => new OfficialAuthValidator(repo),
+            "steam" => new SteamAuthValidator(config, httpClientFactory.CreateClient("steam")),
             var p when Reserved.Contains(p) => new NotImplementedAuthValidator(p),
             _ => new NotImplementedAuthValidator(provider),
         };

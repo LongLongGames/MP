@@ -234,6 +234,46 @@ def main():
             },
         )
 
+    print("--- steam (dev login) ---")
+    steam_id = f"7656119{suffix.zfill(10)[:10]}"
+    expect(
+        "steam dev login missing steam_id -> 401",
+        "POST",
+        "/api/v1/auth/login",
+        401,
+        {
+            "provider": "steam",
+            "app_id": "480",
+            "device_id": device_id,
+            "auth_payload": {},
+        },
+    )
+    code_s, raw_s = expect(
+        "steam dev login -> 200",
+        "POST",
+        "/api/v1/auth/login",
+        200,
+        {
+            "provider": "steam",
+            "app_id": "480",
+            "device_id": f"steam-{device_id}",
+            "auth_payload": {"steam_id": steam_id},
+        },
+    )
+    if code_s == 200:
+        try:
+            access_s, _, account_s = parse_login(raw_s)
+            if access_s:
+                expect(
+                    "me after steam login -> 200",
+                    "GET",
+                    "/api/v1/auth/me",
+                    200,
+                    headers={"Authorization": f"Bearer {access_s}"},
+                )
+        except json.JSONDecodeError:
+            pass
+
     print("--- catalog ---")
     expect("list games -> 200", "GET", "/api/v1/catalog/games", 200)
     expect("list games status filter -> 200", "GET", "/api/v1/catalog/games?status=active", 200)

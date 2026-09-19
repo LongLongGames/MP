@@ -57,6 +57,13 @@ builder.Services.AddSingleton<AuthValidatorFactory>();
 builder.Services.AddSingleton<RefreshTokenStore>();
 builder.Services.AddSingleton(new SimpleJwt(jwtSecret, jwtIssuer));
 
+// Steam Web API：命名 HttpClient，超时 10s
+builder.Services.AddHttpClient("steam", c =>
+{
+    c.Timeout = TimeSpan.FromSeconds(10);
+    c.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "MP.Auth/1.0");
+});
+
 var app = builder.Build();
 
 // 注意：正常启动路径不再执行迁移。迁移由 compose 的 mp-auth-migrate Job 或手动 --migrate 完成。

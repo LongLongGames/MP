@@ -52,6 +52,9 @@ services:
       Jwt__Issuer: battle-net-mp
       Jwt__AccessTokenMinutes: 120
       Jwt__RefreshTokenDays: 14
+      Steam__WebApiKey: ${STEAM_WEB_API_KEY:-}
+      Steam__AppId: ${STEAM_APP_ID:-480}
+      Steam__AllowDevLogin: ${STEAM_ALLOW_DEV_LOGIN:-false}
     depends_on:
       postgres:
         condition: service_healthy

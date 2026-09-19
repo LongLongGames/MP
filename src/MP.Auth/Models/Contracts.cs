@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace MP.Auth.Models;
 
 // provider: steam | psn | xbox | nintendo | apple | google | microsoft_store | official | guest
-// 除 official / guest 已实现外，其余渠道先占位保留（NotImplementedAuthValidator），
+// 已实现：official / guest / steam；其余渠道先占位（NotImplementedAuthValidator），
 // 后续接入哪个渠道就补一个 Validator 实现即可，不影响其他代码。
 public sealed record LoginRequest(
     [property: JsonPropertyName("provider")] string Provider,

@@ -15,7 +15,7 @@ LongLongGames 平台核心：统一账号 + 游戏 Catalog。全公司只部署�
 | mp-auth | Auth + Catalog（.NET 10 AOT） |
 | mp-auth-migrate | 一次性 DbUp 迁移 Job（同一镜像，`--migrate`） |
 
-渠道：`official`、`guest` 已可用；Steam 等占位。
+渠道：`official`、`guest`、`steam` 已可用；其余（psn/xbox/...）占位。
 
 ## 启动
 
@@ -64,6 +64,40 @@ curl -s -X POST http://localhost:11080/api/v1/auth/login \
     "auth_payload": { "username": "tester1", "password": "test1234" }
   }' | jq
 ```
+
+#### Steam 登录
+
+**联调（AllowDevLogin=true，默认开发环境开启）**：客户端只需传 `steam_id`，无需真实 ticket。
+
+```bash
+curl -s -X POST http://localhost:11080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "provider": "steam",
+    "app_id": "480",
+    "device_id": "unity-editor-1",
+    "auth_payload": { "steam_id": "76561198000000000" }
+  }' | jq
+```
+
+**生产**：配置 `Steam:WebApiKey` + `Steam:AppId`，关闭 `AllowDevLogin`。客户端用 Steamworks 取 Session Ticket（hex），放入 `auth_payload.ticket`：
+
+```json
+{
+  "provider": "steam",
+  "app_id": "你的SteamAppId",
+  "device_id": "device-xxx",
+  "auth_payload": {
+    "ticket": "HEX_FROM_GetAuthSessionTicket_OR_GetAuthTicketForWebApi",
+    "steam_id": "7656119...（可选交叉校验）",
+    "app_id": "可选覆盖"
+  }
+}
+```
+
+服务端调用 `ISteamUserAuth/AuthenticateUserTicket`，以返回的 64-bit SteamID 作为 `third_party_id` 绑定账号。
+
+环境变量（见 `.env.example`）：`STEAM_WEB_API_KEY` / `STEAM_APP_ID` / `STEAM_ALLOW_DEV_LOGIN`。
 
 ### Catalog
 
